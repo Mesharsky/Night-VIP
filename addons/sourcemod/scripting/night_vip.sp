@@ -18,6 +18,7 @@
  */
 
 #include <sourcemod>
+#include <multicolors>
 
 #pragma newdecls required
 #pragma semicolon 1
@@ -25,10 +26,15 @@
 #define PLUGIN_VERSION "0.1"
 
 bool g_FreeVip[MAXPLAYERS + 1];
+bool g_PlayerNotify;
+
+char g_ChatTag[64];
 
 int g_StartingHour;
 int g_EndingHour;
 int g_Flag;
+
+float g_NotificationTime;
 
 public Plugin myinfo =
 {
@@ -41,8 +47,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-    //LoadTranslations("night_vip.phrases.txt");
+    LoadTranslations("night_vip.phrases.txt");
     LoadConfig();
+
+    HookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_Pre);
 }
 
 public void OnClientPostAdminCheck(int client)
@@ -51,14 +59,43 @@ public void OnClientPostAdminCheck(int client)
     {
         AddFlagsToClient(client, g_Flag);
         g_FreeVip[client] = true;
-        PrintToServer("Nadano flage graczowi %N, [%i]", client, g_Flag);
+        PrintToServer("Nadano flage graczowi %N, [%i]", client, g_Flag); // Debug
+        if (g_PlayerNotify)
+            CreateTimer(g_NotificationTime, Timer_PlayerNotify, client);
     }
+}
+
+public Action Timer_PlayerNotify(Handle tmr, int client)
+{
+    if (!IsClientInGame(client) && IsFakeClient(client))
+        return Plugin_Handled;
+
+    CPrintToChat(client, "%s %t", g_ChatTag, "Player Notify");
+
+    return Plugin_Handled;
 }
 
 public void OnClientDisconnect(int client)
 {
     if (!IsFakeClient(client))
         g_FreeVip[client] = false;
+}
+
+void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
+{
+    if (!IsNight())
+        return;
+
+    int client = GetClientOfUserId(event.GetInt("userid"));
+
+    if (!g_FreeVip[client] && IsClientInGame(client) && !IsFakeClient(client))
+    {
+        AddFlagsToClient(client, g_Flag);
+        g_FreeVip[client] = true;
+        PrintToServer("Nadano flage graczowi %N, [%i]", client, g_Flag); // debug
+
+        CPrintToChat(client, "%s %t", g_ChatTag, "Player Notify");
+    }
 }
 
 void LoadConfig()
@@ -74,6 +111,8 @@ void LoadConfig()
     if (!kv.JumpToKey("Settings"))
         SetFailState("Missing \"Settings\" section in config file");
 
+    kv.GetString("chat_tag", g_ChatTag, sizeof(g_ChatTag));
+
     g_StartingHour = kv.GetNum("starting_hour");
     g_EndingHour = kv.GetNum("ending_hour");
 
@@ -82,7 +121,9 @@ void LoadConfig()
 
     g_Flag = ReadFlagString(buffer);
 
-    kv.Rewind();
+    g_PlayerNotify = view_as<bool>(kv.GetNum("player_notify"));
+    g_NotificationTime = kv.GetFloat("player_notify_time");
+
     delete kv;
 }
 
@@ -104,5 +145,5 @@ bool IsNight()
     if (hour >= max || hour <= min)
         return true;
 
-    return false;    
+    return false; 
 }

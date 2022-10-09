@@ -1,4 +1,7 @@
 "Phrases"
 {
-    
+    "Player Notify"
+    {
+        "en"    "Thanks for joining us at this time. You have assigned {green}Free VIP{default} untill night time is over! {lightred}Enjoy"
+    }
 }
