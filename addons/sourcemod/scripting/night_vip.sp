@@ -59,15 +59,14 @@ public void OnClientPostAdminCheck(int client)
     {
         AddFlagsToClient(client, g_Flag);
         g_FreeVip[client] = true;
-        PrintToServer("Nadano flage graczowi %N, [%i]", client, g_Flag); // Debug
-        if (g_PlayerNotify)
+        if (g_PlayerNotify && !IsFakeClient(client))
             CreateTimer(g_NotificationTime, Timer_PlayerNotify, client);
     }
 }
 
 public Action Timer_PlayerNotify(Handle tmr, int client)
 {
-    if (!IsClientInGame(client) && IsFakeClient(client))
+    if (!IsClientInGame(client))
         return Plugin_Handled;
 
     CPrintToChat(client, "%s %t", g_ChatTag, "Player Notify");
@@ -77,8 +76,7 @@ public Action Timer_PlayerNotify(Handle tmr, int client)
 
 public void OnClientDisconnect(int client)
 {
-    if (!IsFakeClient(client))
-        g_FreeVip[client] = false;
+    g_FreeVip[client] = false;
 }
 
 void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -92,7 +90,6 @@ void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
     {
         AddFlagsToClient(client, g_Flag);
         g_FreeVip[client] = true;
-        PrintToServer("Nadano flage graczowi %N, [%i]", client, g_Flag); // debug
 
         CPrintToChat(client, "%s %t", g_ChatTag, "Player Notify");
     }

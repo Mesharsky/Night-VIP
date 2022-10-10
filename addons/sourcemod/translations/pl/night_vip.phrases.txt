@@ -1,0 +1,7 @@
+"Phrases"
+{
+    "Player Notify"
+    {
+        "pl"    "Witaj, jako iż dołączyłeś do nas w godzinach nocnych otrzymujesz {green}Darmowego VIPA! {lightred}Baw się dobrze"
+    }
+}
