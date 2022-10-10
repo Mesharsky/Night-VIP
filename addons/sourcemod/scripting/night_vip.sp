@@ -53,6 +53,14 @@ public void OnPluginStart()
     HookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_Pre);
 }
 
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+    CreateNative("NV_IsNight", Native_IsNight);
+    RegPluginLibrary("night_vip");
+
+    return APLRes_Success;
+}
+
 public void OnClientPostAdminCheck(int client)
 {
     if (IsNight())
@@ -143,4 +151,9 @@ bool IsNight()
         return true;
 
     return false; 
+}
+
+public any Native_IsNight(Handle plugin, int numParams)
+{
+    return IsNight();
 }
