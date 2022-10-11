@@ -56,6 +56,7 @@ public void OnPluginStart()
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
     CreateNative("NV_IsNight", Native_IsNight);
+    CreateNative("NV_ClientHasFreeVIP", Native_ClientHasFreeVIP);
     RegPluginLibrary("night_vip");
 
     return APLRes_Success;
@@ -156,4 +157,14 @@ bool IsNight()
 public any Native_IsNight(Handle plugin, int numParams)
 {
     return IsNight();
+}
+
+public any Native_ClientHasFreeVIP(Handle plugin, int numParams)
+{
+    int client = GetNativeCell(1);
+
+    if (client < 0 || client >= MaxClients)
+        return ThrowNativeError(SP_ERROR_NATIVE, "Invalid client index %i", client);
+
+    return g_FreeVip[client];    
 }
