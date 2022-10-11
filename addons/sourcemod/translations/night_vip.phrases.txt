@@ -2,6 +2,6 @@
 {
     "Player Notify"
     {
-        "en"    "Thanks for joining us at this time. You have assigned {green}Free VIP{default} untill night time is over! {lightred}Enjoy"
+        "en"    "Thanks for joining. You've been granted {green}Free VIP{default} until night time is over! {lightred}Enjoy."
     }
 }
