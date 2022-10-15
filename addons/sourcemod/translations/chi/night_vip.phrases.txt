@@ -1,0 +1,7 @@
+"Phrases"
+{
+    "Player Notify"
+    {
+        "en"    "欢迎你加入游戏. 你已被授予 {green}免费 VIP{default} 直到晨光熹微! {lightred}尽情享受吧."
+    }
+}
