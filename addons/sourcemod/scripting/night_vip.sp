@@ -23,7 +23,7 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "0.1"
+#define PLUGIN_VERSION "0.2"
 
 bool g_FreeVip[MAXPLAYERS + 1];
 bool g_PlayerNotify;
@@ -148,7 +148,14 @@ bool IsNight()
     int max = g_StartingHour > g_EndingHour ? g_StartingHour : g_EndingHour;
     int min = g_StartingHour < g_EndingHour ? g_StartingHour : g_EndingHour;
 
-    if (hour >= max || hour <= min)
+    if (min > max)
+    {
+        int temp = min;
+        min = max;
+        max = temp;
+    }
+
+    if (hour >= min && hour <= max)
         return true;
 
     return false; 
