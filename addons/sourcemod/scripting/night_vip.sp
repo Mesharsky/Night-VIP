@@ -48,9 +48,13 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
     LoadTranslations("night_vip.phrases.txt");
-    LoadConfig();
 
     HookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_Pre);
+}
+
+public void OnMapStart()
+{
+    LoadConfig();
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -68,6 +72,7 @@ public void OnClientPostAdminCheck(int client)
     {
         AddFlagsToClient(client, g_Flag);
         g_FreeVip[client] = true;
+
         if (g_PlayerNotify && !IsFakeClient(client))
             CreateTimer(g_NotificationTime, Timer_PlayerNotify, client);
     }
@@ -91,7 +96,7 @@ public void OnClientDisconnect(int client)
 void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
     if (!IsNight())
-        return;
+        return;  
 
     int client = GetClientOfUserId(event.GetInt("userid"));
 
@@ -140,25 +145,43 @@ void AddFlagsToClient(int client, int adminFlags)
 
 bool IsNight()
 {
+    g_StartingHour = clamp(g_StartingHour, 0, 23);
+    g_EndingHour = clamp(g_EndingHour, 0, 23);
+
+    if (g_StartingHour == g_EndingHour)
+    {
+        return true;
+    }
+    
     char buffer[4];
     FormatTime(buffer, sizeof(buffer), "%H", GetTime());
 
     int hour = StringToInt(buffer);
 
-    int max = g_StartingHour > g_EndingHour ? g_StartingHour : g_EndingHour;
-    int min = g_StartingHour < g_EndingHour ? g_StartingHour : g_EndingHour;
-
-    if (min > max)
+    if (g_StartingHour < g_EndingHour)
     {
-        int temp = min;
-        min = max;
-        max = temp;
+        // The night time range is within a single day
+        if (hour >= g_StartingHour && hour <= g_EndingHour)
+            return true;
+    }
+    else if (g_StartingHour > g_EndingHour)
+    {
+        // The night time range spans across midnight
+        if (hour >= g_StartingHour || hour <= g_EndingHour)
+            return true;
     }
 
-    if (hour >= min && hour <= max)
-        return true;
+    return false;
+}
 
-    return false; 
+int clamp(int value, int min, int max)
+{
+    if (value < min)
+        return min;
+    else if (value > max)
+        return max;
+    else
+        return value;
 }
 
 public any Native_IsNight(Handle plugin, int numParams)
